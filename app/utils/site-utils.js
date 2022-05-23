@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import {getConfig} from 'pwa-kit-react-sdk/ssr/universal/utils'
+import {getConfig} from 'pwa-kit-runtime/utils/ssr-config'
 import {getParamsFromPath} from './utils'
 import {absoluteUrl} from './url'
 

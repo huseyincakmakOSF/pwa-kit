@@ -7,7 +7,7 @@
 
 import {absoluteUrl} from './url'
 import {getSites, resolveSiteFromUrl} from './site-utils'
-import {getConfig} from 'pwa-kit-react-sdk/ssr/universal/utils'
+import {getConfig} from 'pwa-kit-runtime/utils/ssr-config'
 
 /**
  * Call requestIdleCallback in supported browsers.

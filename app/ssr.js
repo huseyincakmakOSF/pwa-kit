@@ -6,63 +6,60 @@
  */
 'use strict'
 
-import path from 'path'
-import {createApp, createHandler, serveStaticFile} from 'pwa-kit-react-sdk/ssr/server/express'
-import {isRemote} from 'pwa-kit-react-sdk/utils/ssr-server'
-import {render} from 'pwa-kit-react-sdk/ssr/server/react-rendering'
-import helmet from 'helmet'
-import {loadConfig} from 'pwa-kit-react-sdk/utils/config'
+const path = require('path')
+const {getRuntime} = require('pwa-kit-runtime/ssr/server/express')
+const {isRemote} = require('pwa-kit-runtime/utils/ssr-server')
+const {getConfig} = require('pwa-kit-runtime/utils/ssr-config')
+const helmet = require('helmet')
 
-const app = createApp({
+const options = {
     // The build directory (an absolute path)
     buildDir: path.resolve(process.cwd(), 'build'),
 
     // The cache time for SSR'd pages (defaults to 600 seconds)
     defaultCacheTimeSeconds: 600,
 
-    // The path to the favicon. This must also appear in
-    // the mobify.ssrShared section of package.json.
-    faviconPath: path.resolve(process.cwd(), 'build/static/ico/favicon.ico'),
-
-    // The location of the apps manifest file relative to the build directory
-    manifestPath: 'static/manifest.json',
+    // This is the value of the 'mobify' object from package.json
+    mobify: getConfig(),
 
     // The port that the local dev server listens on
     port: 3000,
 
-    // This is the `mobify` object defined in your config folder or package.json file.
-    mobify: loadConfig(),
-
     // The protocol on which the development Express app listens.
     // Note that http://localhost is treated as a secure context for development.
-    protocol: 'http',
+    protocol: 'http'
+}
 
-    enableLegacyRemoteProxying: false
-})
+const runtime = getRuntime()
 
-// Set HTTP security headers
-app.use(
-    helmet({
-        contentSecurityPolicy: {
-            useDefaults: true,
-            directives: {
-                'img-src': ["'self'", '*.commercecloud.salesforce.com', 'data:'],
-                'script-src': ["'self'", "'unsafe-eval'"],
+const {handler} = runtime.createHandler(options, (app) => {
+    // Set HTTP security headers
+    app.use(
+        helmet({
+            contentSecurityPolicy: {
+                useDefaults: true,
+                directives: {
+                    'img-src': ["'self'", '*.commercecloud.salesforce.com', 'data:'],
+                    'script-src': ["'self'", "'unsafe-eval'", 'storage.googleapis.com'],
 
-                // Do not upgrade insecure requests for local development
-                'upgrade-insecure-requests': isRemote() ? [] : null
-            }
-        },
-        hsts: isRemote()
+                    // Do not upgrade insecure requests for local development
+                    'upgrade-insecure-requests': isRemote() ? [] : null
+                }
+            },
+            hsts: isRemote()
+        })
+    )
+
+    // Handle the redirect from SLAS as to avoid error
+    app.get('/callback?*', (req, res) => {
+        res.send()
     })
-)
+    app.get('/robots.txt', runtime.serveStaticFile('static/robots.txt'))
+    app.get('/favicon.ico', runtime.serveStaticFile('static/ico/favicon.ico'))
 
-// Handle the redirect from SLAS as to avoid error
-app.get('/callback?*', (req, res) => {
-    res.send()
+    app.get('/worker.js(.map)?', runtime.serveServiceWorker)
+    app.get('*', runtime.render)
 })
-app.get('/robots.txt', serveStaticFile('static/robots.txt'))
-app.get('/*', render)
 // SSR requires that we export a single handler function called 'get', that
 // supports AWS use of the server that we created above.
-export const get = createHandler(app)
+exports.get = handler
