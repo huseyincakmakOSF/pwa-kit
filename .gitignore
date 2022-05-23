@@ -13,7 +13,7 @@ app/integration-manager/docs
 messaging/*.csr
 
 # Local App Configuration Files
-config/local.*
+config/
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
