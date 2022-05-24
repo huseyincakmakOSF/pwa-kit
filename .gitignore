@@ -13,7 +13,7 @@ app/integration-manager/docs
 messaging/*.csr
 
 # Local App Configuration Files
-config/*
+config/local.*
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
@@ -30,3 +30,5 @@ app/cache-hash-manifest.json
 app/loader-cache-hash-manifest.json
 
 .vscode
+
+.env

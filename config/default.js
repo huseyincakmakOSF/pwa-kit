@@ -22,9 +22,9 @@ module.exports = {
         commerceAPI: {
             proxyPath: `/mobify/proxy/api`,
             parameters: {
-                clientId: 'c45fb11b-e9a3-4814-b865-c3642c0a7196',
-                organizationId: 'f_ecom_zzrb_187',
-                shortCode: 'kv7kzm78',
+                clientId: process.env.CLIENTID,
+                organizationId: process.env.ORGANIZATIONID,
+                shortCode: process.env.SHORTCODE,
                 siteId: 'RefArch'
             }
         },
